@@ -1,0 +1,41 @@
+# Configuration for Information Sets Evolution
+# Goal: Evolve JavaScript code to add information set support to sequential game solver
+
+max_iterations: 50
+checkpoint_interval: 10
+
+# LLM configuration
+llm:
+  primary_model: "gpt-5-mini"
+  primary_model_weight: 0.7
+  secondary_model: "gpt-5-nano"
+  secondary_model_weight: 0.3
+  api_base: "https://api.openai.com/v1"
+  temperature: 0.8
+  max_tokens: 16000
+  timeout: 120
+
+# Prompt configuration
+prompt:
+  system_message: "You are an expert in game theory and JavaScript programming. Your task is to improve the implementation of information sets for sequential games. Information sets are crucial for modeling imperfect information games where players cannot distinguish between certain decision points. Focus on: (1) Efficient data structures for information sets, (2) Correct handling of beliefs and indistinguishability, (3) Accurate equilibrium computation for games with imperfect information, (4) Clean, readable, and well-documented code. The code should handle edge cases gracefully and provide meaningful error messages."
+
+# Database configuration
+database:
+  population_size: 40
+  archive_size: 15
+  num_islands: 3
+  elite_selection_ratio: 0.25
+  exploitation_ratio: 0.6
+
+  embedding_model: "text-embedding-3-small"
+  similarity_threshold: 0.98
+
+# Evaluator configuration
+evaluator:
+  timeout: 30
+  cascade_thresholds: [0.5]  # Must pass at least 50% of basic tests to proceed
+  parallel_evaluations: 4
+
+# Evolution settings
+diff_based_evolution: true
+max_code_length: 25000
