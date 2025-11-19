@@ -1,0 +1,115 @@
+# OpenEvolve Configuration for Sequential Game Solver Evolution
+# This config is optimized for evolving game theory solver algorithms
+
+# General settings
+max_iterations: 50                      # Evolve for 50 iterations
+checkpoint_interval: 5                  # Save checkpoints frequently
+log_level: "INFO"
+random_seed: 42                         # For reproducibility
+
+# Evolution settings
+diff_based_evolution: true              # Use diff-based evolution (more stable for algorithms)
+max_code_length: 15000                  # Allow longer code for complex solvers
+
+# Early stopping
+early_stopping_patience: 15             # Stop if no improvement for 15 iterations
+convergence_threshold: 0.01             # Require 1% improvement to continue
+early_stopping_metric: "combined_score"
+
+# LLM configuration
+llm:
+  models:
+    - name: "gemini-2.0-flash-lite"
+      weight: 0.8
+    - name: "gemini-2.0-flash"
+      weight: 0.2
+
+  evaluator_models:
+    - name: "gemini-2.0-flash-lite"
+      weight: 1.0
+
+  # API configuration - will use OPENAI_API_KEY environment variable
+  api_base: "https://generativelanguage.googleapis.com/v1beta/openai/"
+  api_key: null
+
+  # Generation parameters
+  temperature: 0.8                      # Higher temperature for more creative algorithms
+  top_p: 0.95
+  max_tokens: 8192                      # More tokens for algorithm generation
+
+  # Request parameters
+  timeout: 90                           # Longer timeout for algorithm generation
+  retries: 3
+  retry_delay: 5
+
+# Prompt configuration
+prompt:
+  system_message: "You are an expert in game theory and algorithm optimization. Your goal is to evolve efficient and correct implementations of backward induction for sequential games."
+
+  evaluator_system_message: "You are an expert in game theory and code review, focused on correctness and efficiency of game-solving algorithms."
+
+  num_top_programs: 3
+  num_diverse_programs: 2
+
+  use_template_stochasticity: true
+
+  include_artifacts: true
+  max_artifact_bytes: 30720             # 30KB for detailed game outputs
+
+# Database configuration
+database:
+  db_path: null
+  in_memory: true
+  log_prompts: true
+
+  population_size: 500
+  archive_size: 50
+  num_islands: 3                        # 3 islands for diversity
+
+  migration_interval: 10                # Migrate every 10 generations
+  migration_rate: 0.15                  # 15% migration rate
+
+  elite_selection_ratio: 0.15
+  exploration_ratio: 0.25
+  exploitation_ratio: 0.7
+
+  # Feature map for MAP-Elites
+  # We use custom features from the evaluator:
+  # - accuracy: How many games solved correctly (0-1)
+  # - speed: Inverse of solve time (0-1, higher is faster)
+  # - robustness: Error handling capability (0-1)
+  feature_dimensions:
+    - "accuracy"                        # Correctness dimension
+    - "speed"                           # Performance dimension
+    - "robustness"                      # Edge case handling
+
+  feature_bins:
+    accuracy: 10                        # 10 bins for accuracy
+    speed: 10                           # 10 bins for speed
+    robustness: 5                       # 5 bins for robustness
+
+  diversity_reference_size: 15
+
+# Evaluator configuration
+evaluator:
+  timeout: 60                           # 1 minute per evaluation
+  max_retries: 2
+
+  cascade_evaluation: true
+  cascade_thresholds:
+    - 0.3                               # Stage 1: Basic validation
+    - 0.5                               # Stage 2: Simple games
+    - 0.7                               # Stage 3: Complex games
+
+  parallel_evaluations: 4               # Evaluate 4 programs in parallel
+
+  use_llm_feedback: false               # Disable for faster evolution
+
+# Evolution trace for analysis
+evolution_trace:
+  enabled: true                         # Enable trace logging
+  format: 'jsonl'
+  include_code: false                   # Don't include full code (large files)
+  include_prompts: true
+  buffer_size: 5
+  compress: false
